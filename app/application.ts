@@ -236,7 +236,33 @@ class Paddle extends Sprite {
 }
 
 class Brick extends Sprite {
+    lives:number = 1;
+    points:number = 20;
 
+    reset(){
+        this.lives=1;
+        this.show();
+    }
+     change(){
+     this.sprite.classList.remove("hardbrick");
+    this.sprite.classList.add("brick"); 
+    }
+   
+}
+
+class HardBrick extends Brick{
+    lives:number = 2;
+    points:number = 40;
+    constructor(sprite:HTMLElement){
+        super(sprite);
+        sprite.classList.add("hardbrick");
+    }
+     reset(){
+        this.show();
+        this.lives=2;
+        this.sprite.classList.add("hardbrick");
+    }
+    
 }
 
 enum GameState {
@@ -277,7 +303,10 @@ class Game {
         );
 
         for (let i = 0; i < bricks.length; i++) {
-            this.bricks.push(new Brick(<HTMLElement>bricks[i]));
+              if(Math.round(Math.random()*10 )===1)
+                this.bricks.push(new HardBrick(<HTMLElement>bricks[i]));
+            else
+                this.bricks.push(new Brick(<HTMLElement>bricks[i]));
         }
 
         this.createWalls(this.ball.radius, boardElement.offsetWidth, boardElement.offsetHeight);
@@ -301,6 +330,7 @@ class Game {
         this.livesLabel.innerText = '' + this.livesLeft;
         this.score = 0;
         this.scoreLabel.innerText = '' + this.score;
+        this.bricks.forEach((e)=>e.reset());
         this.ball.show();
         this.ball.bounceWithAngle(60);
         var ballPosition = this.ball.clone();
@@ -370,8 +400,17 @@ class Game {
                 }
 
                 if (wasHit) {
-                    brick.hide();
-                    this.score += 20;
+                        --brick.lives;
+                        
+                    if(brick.lives == 0)
+                    {
+                        brick.hide();  
+                        this.score += brick.points;
+                    }else
+                    {
+                      brick.change();
+                    }
+                    
                     this.scoreLabel.innerText = '' + this.score;
                     break;
                 }
